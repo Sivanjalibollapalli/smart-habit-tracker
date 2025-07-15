@@ -1,0 +1,35 @@
+/* Dashboard.css */
+body {
+  background-color: #f3f4f6 !important; /* Soft modern background */
+}
+
+/* Dashboard.module.css */
+/* Dashboard.module.css */
+/* Dashboard.module.css */
+
+/* Colorful gradient background */
+/* Dashboard.module.css */
+
+.dashboardContainer {
+  min-height: 100vh;
+  width: 100%;
+  padding: 2rem 0;
+  background: linear-gradient(135deg, #f0ece6 0%, #2558f1 100%);
+  background-attachment: fixed;
+}
+
+/* Override Bootstrap Card */
+.habitCard {
+  background: linear-gradient(135deg, #ffffff 0%, #e0f7fa 100%) !important;
+  border-radius: 16px !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1) !important;
+  border: none !important;
+  transition: transform 0.2s ease;
+}
+
+.habitCard:hover {
+  transform: translateY(-5px);
+}
+
+
+
