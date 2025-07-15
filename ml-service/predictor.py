@@ -1,15 +1,15 @@
 import pandas as pd
 from sklearn.linear_model import LogisticRegression
 
-# Sample training data (can later be replaced with real logs from MongoDB)
-data = pd.DataFrame({
+# Sample training data
+train_data = pd.DataFrame({
     'streak': [1, 2, 3, 0, 5, 6, 1, 0],
     'completed_yesterday': [1, 1, 1, 0, 1, 1, 0, 0],
     'success': [1, 1, 1, 0, 1, 1, 0, 0]
 })
 
-X = data[['streak', 'completed_yesterday']]
-y = data['success']
+X = train_data[['streak', 'completed_yesterday']]
+y = train_data['success']
 
 model = LogisticRegression()
 model.fit(X, y)
@@ -32,6 +32,9 @@ def analyze_habit(habit_data):
         tips.append("You missed a few days. Set reminders to stay consistent!")
     if streak >= target:
         tips.append("Great job! Consider increasing your goal or starting a new habit.")
+    if len(completions) >= 3 and completions[-3:] == [0, 0, 0]:
+        tips.append("You've missed 3 days in a row! Try setting a recovery challenge.")
+
 
     return {
         "success_chance": predict_success(streak, 1 if streak > 0 else 0),
