@@ -18,6 +18,18 @@ const habitSchema = new mongoose.Schema({
   completionDates: {
     type: [String], // Store as 'YYYY-MM-DD' (e.g., '2025-07-10')
     default: [],
+  },
+  daysLeft: {
+    type: Number,
+    default: 0,
+  },
+  lastDecrementDate: {
+    type: Date,
+    default: null,
+  },
+  lastCompletionDate: {
+    type: Date,
+    default: null,
   }
 }, { timestamps: true });
 

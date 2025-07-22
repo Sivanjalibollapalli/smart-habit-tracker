@@ -1,0 +1,41 @@
+.navbar {
+  background: linear-gradient(90deg, #e3edf7, #7ea7c7 80%);
+  color: #2d3a4a;
+  padding: 1rem 2rem;
+  box-shadow: 0 4px 24px #b6d0e222;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  animation: navbarFadeIn 1.2s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+@keyframes navbarFadeIn {
+  0% { opacity: 0; transform: translateY(-40px);}
+  100% { opacity: 1; transform: translateY(0);}
+}
+
+.navbarTitle {
+  font-size: 2.1rem;
+  font-weight: 800;
+  color: #3b4a6b;
+  letter-spacing: 1.5px;
+  filter: brightness(1.1) drop-shadow(0 2px 8px #e3edf7cc);
+}
+
+.logoutButton {
+  background: linear-gradient(90deg, #7ea7c7, #3b4a6b 80%);
+  color: #fff;
+  border: none;
+  border-radius: 16px;
+  padding: 0.5rem 1.5rem;
+  font-weight: 700;
+  font-size: 1rem;
+  box-shadow: 0 2px 12px #7ea7c744;
+  transition: background 0.22s, box-shadow 0.18s, transform 0.16s;
+  cursor: pointer;
+  outline: none;
+}
+.logoutButton:hover, .logoutButton:focus {
+  background: linear-gradient(90deg, #3b4a6b, #7ea7c7 80%);
+  box-shadow: 0 4px 24px #7ea7c788;
+  transform: scale(1.07);
+} 

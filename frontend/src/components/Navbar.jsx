@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Navbar as BSNavbar, Container, Button } from 'react-bootstrap';
+import styles from './Navbar.module.css';
 
 function Navbar() {
   const navigate = useNavigate();
@@ -13,15 +14,17 @@ function Navbar() {
   };
 
   return (
-    <BSNavbar bg="light" expand="lg" className="shadow-sm mb-3">
+    <nav className={styles.navbar + ' shadow-navbar'}>
       <Container className="d-flex justify-content-between">
-        <span className="fw-bold fs-4 text-primary">Welcome, <strong>{username}</strong></span>
+        <span className={styles.navbarTitle}>Welcome, <strong>{username}</strong></span>
         <div className="d-flex align-items-center gap-3">
           
-          <Button variant="outline-danger" size="sm" onClick={handleLogout}>Logout</Button>
+          <Button onClick={handleLogout} className={styles.logoutButton}>
+            Logout
+          </Button>
         </div>
       </Container>
-    </BSNavbar>
+    </nav>
   );
 }
 

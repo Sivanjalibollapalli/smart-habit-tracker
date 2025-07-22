@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { Form, Button, Card } from 'react-bootstrap';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import styles from './AddHabitForm.module.css';
+import { motion } from 'framer-motion';
 
 function AddHabitForm({ onHabitAdded, onCancel }) {
   const [name, setName] = useState('');
@@ -32,43 +33,46 @@ function AddHabitForm({ onHabitAdded, onCancel }) {
   };
 
   return (
-    <Card className="p-3 shadow-sm mt-3 bg-light">
-      <Form onSubmit={handleSubmit}>
-        <Form.Group className="mb-2">
-          <Form.Label>Habit Name</Form.Label>
-          <Form.Control
-            type="text"
-            value={name}
-            onChange={e => setName(e.target.value)}
-            required
-          />
-        </Form.Group>
-
-        <Form.Group className="mb-2">
-          <Form.Label>Target Days</Form.Label>
-          <Form.Control
-            type="number"
-            value={target}
-            onChange={e => setTarget(e.target.value)}
-            required
-          />
-        </Form.Group>
-
-        <Form.Group className="mb-3">
-          <Form.Label>Description</Form.Label>
-          <Form.Control
-            type="text"
-            value={description}
-            onChange={e => setDescription(e.target.value)}
-          />
-        </Form.Group>
-
-        <div className="d-flex justify-content-between">
-          <Button type="submit" variant="success">Add Habit</Button>
-          <Button variant="outline-secondary" onClick={onCancel}>Cancel</Button>
+    <motion.div
+      className={styles.addHabitCard + ' shadow-card'}
+      initial={{ opacity: 0, y: 40, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.7, type: 'spring', bounce: 0.25 }}
+    >
+      <div className={styles.addHabitTitle}>Add a New Habit</div>
+      <form onSubmit={handleSubmit}>
+        <label className={styles.formLabel} htmlFor="habit-name">Habit Name</label>
+        <input
+          id="habit-name"
+          className={styles.formInput}
+          type="text"
+          value={name}
+          onChange={e => setName(e.target.value)}
+          required
+        />
+        <label className={styles.formLabel} htmlFor="habit-target">Target Days</label>
+        <input
+          id="habit-target"
+          className={styles.formInput}
+          type="number"
+          value={target}
+          onChange={e => setTarget(e.target.value)}
+          required
+        />
+        <label className={styles.formLabel} htmlFor="habit-desc">Description</label>
+        <input
+          id="habit-desc"
+          className={styles.formInput}
+          type="text"
+          value={description}
+          onChange={e => setDescription(e.target.value)}
+        />
+        <div className={styles.buttonRow}>
+          <button type="submit" className={styles.addBtn}>Add Habit</button>
+          <button type="button" className={styles.cancelBtn} onClick={onCancel}>Cancel</button>
         </div>
-      </Form>
-    </Card>
+      </form>
+    </motion.div>
   );
 }
 

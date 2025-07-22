@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import styles from './Register.module.css';
 
 function Register() {
   const navigate = useNavigate();
@@ -9,9 +10,7 @@ function Register() {
   const [strength, setStrength] = useState('');
   const [loading, setLoading] = useState(false);
 
-  // ✅ Redirect if already logged in
   useEffect(() => {
-    
     const token = localStorage.getItem('token');
     if (token) {
       navigate('/');
@@ -21,7 +20,6 @@ function Register() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
-
     if (name === 'password') {
       if (value.length < 6) setStrength('Weak');
       else if (/[A-Z]/.test(value) && /[0-9]/.test(value) && value.length >= 8) {
@@ -34,18 +32,15 @@ function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(form.email)) {
       toast.error('Enter a valid email address.');
       return;
     }
-
     if (!form.username.trim()) {
       toast.error('Username is required.');
       return;
     }
-
     setLoading(true);
     try {
       await axios.post('http://localhost:5000/api/auth/register', form);
@@ -63,92 +58,81 @@ function Register() {
   };
 
   return (
-    <div
-      className="d-flex min-vh-100"
-      style={{
-        background: 'linear-gradient(135deg, #9C6ADE, #ED8AC5)',
-        color: 'white',
-      }}
-    >
+    <div className={styles.bg}>
       {/* Left Description Panel */}
-      <div className="col-md-6 d-none d-md-flex align-items-center justify-content-center p-5">
-        <div>
-          <h1 className="fw-bold display-5">Smart Habit Tracker</h1>
-          <p className="mt-4" style={{ maxWidth: '400px', fontSize: '1.1rem' }}>
-            Build better habits, track progress, and get insights powered by AI. Our platform empowers
-            you to achieve long-term success, one habit at a time.
-          </p>
-        </div>
+      <div className={styles.leftPanel}>
+        <h1 className={styles.title}>Smart Habit Tracker</h1>
+        <p className={styles.desc}>
+          Build better habits, track progress, and get insights powered by AI. Our platform empowers
+          you to achieve long-term success, one habit at a time.
+        </p>
       </div>
-
       {/* Right Register Panel */}
-      <div className="col-md-6 d-flex align-items-center justify-content-center p-4">
-        <div
-          className="w-100"
-          style={{
-            maxWidth: '400px',
-            background: 'white',
-            color: 'black',
-            borderRadius: '20px',
-            padding: '30px',
-          }}
-        >
-          <h2 className="text-center fw-bold mb-3">Create Account</h2>
-          <p className="text-center text-muted">Start your habit journey today!</p>
-
+      <div className={styles.rightPanel}>
+        <div className={styles.registerBox}>
+          <h2 className={styles.registerTitle}>Create Account</h2>
+          <p className={styles.registerSubtitle}>Start your habit journey today!</p>
           <form onSubmit={handleSubmit}>
-            <div className="mb-3">
+            <div className={styles.inputGroup}>
               <input
                 type="text"
                 name="username"
-                className="form-control rounded-pill px-4"
-                placeholder="Username"
+                id="register-username"
+                className={styles.input}
+                placeholder=" "
+                value={form.username}
                 onChange={handleChange}
                 required
+                autoComplete="username"
               />
+              <label className={styles.floatingLabel} htmlFor="register-username">Username</label>
             </div>
-            <div className="mb-3">
+            <div className={styles.inputGroup}>
               <input
                 type="email"
                 name="email"
-                className="form-control rounded-pill px-4"
-                placeholder="Email"
+                id="register-email"
+                className={styles.input}
+                placeholder=" "
+                value={form.email}
                 onChange={handleChange}
                 required
+                autoComplete="email"
               />
+              <label className={styles.floatingLabel} htmlFor="register-email">Email</label>
             </div>
-            <div className="mb-1">
+            <div className={styles.inputGroup}>
               <input
                 type="password"
                 name="password"
-                className="form-control rounded-pill px-4"
-                placeholder="Password"
+                id="register-password"
+                className={styles.input}
+                placeholder=" "
+                value={form.password}
                 onChange={handleChange}
                 required
+                autoComplete="new-password"
               />
+              <label className={styles.floatingLabel} htmlFor="register-password">Password</label>
             </div>
-            <div className="mb-2">
-              <small
-                className={`text-${
-                  strength === 'Strong' ? 'success' : strength === 'Medium' ? 'warning' : 'danger'
-                }`}
-              >
+            <div className={styles.strengthBar}>
+              <span className={
+                strength === 'Strong' ? styles.strong :
+                strength === 'Medium' ? styles.medium :
+                strength === 'Weak' && form.password ? styles.weak : ''
+              }>
                 Password Strength: {strength}
-              </small>
+              </span>
             </div>
-
-            <div className="mt-3">
-              <button
-                type="submit"
-                className="btn btn-success w-100 rounded-pill"
-                disabled={loading}
-              >
-                {loading ? 'Registering...' : 'Register'}
-              </button>
-            </div>
+            <button
+              type="submit"
+              className={styles.registerBtn}
+              disabled={loading}
+            >
+              {loading ? 'Registering...' : 'Register'}
+            </button>
           </form>
-
-          <p className="mt-4 text-center">
+          <p className={styles.loginText}>
             Already have an account? <a href="/login">Login</a>
           </p>
         </div>

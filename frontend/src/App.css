@@ -36,3 +36,34 @@
     transform: rotate(360deg);
   }
 }
+
+/* Custom heatmap calendar colors */
+.color-empty {
+  fill: #f5f6fa !important;
+}
+.color-github-1 {
+  fill: #c7d8f7 !important;
+}
+.color-github-2 {
+  fill: #7ea7c7 !important;
+}
+.color-github-3 {
+  fill: #3b4a6b !important;
+}
+.color-github-4 {
+  fill: #254060 !important;
+}
+
+/* Shadow utility classes for modern, soft elevation */
+.shadow-card {
+  box-shadow: 0 4px 24px rgba(62, 104, 163, 0.10), 0 1.5px 8px rgba(62, 104, 163, 0.08);
+}
+.shadow-modal {
+  box-shadow: 0 8px 40px rgba(62, 104, 163, 0.18), 0 2px 16px rgba(62, 104, 163, 0.12);
+}
+.shadow-navbar {
+  box-shadow: 0 2px 12px rgba(62, 104, 163, 0.08);
+}
+.shadow-btn-hover:hover, .shadow-btn-hover:focus {
+  box-shadow: 0 4px 16px rgba(62, 104, 163, 0.18);
+}
