@@ -23,11 +23,17 @@ body {
   100% { opacity: 1; transform: scale(1); }
 }
 
+:root {
+  --card-bg: #fff;
+  --card-text: #222;
+  --accent-bar: linear-gradient(90deg, #21bfae 0%, #00c6ff 100%);
+  --dashboard-bg: #f3faff;
+}
+
 .dashboardContainer {
   min-height: 100vh;
   width: 100%;
   padding: 2rem 0;
-  background: linear-gradient(120deg, #e3edf7 0%, #b6d0e2 60%, #7ea7c7 100%);
   background-attachment: fixed;
   animation: fadeInUp 1.2s cubic-bezier(0.23, 1, 0.32, 1);
 }
@@ -136,13 +142,38 @@ body {
 }
 
 .habitCard, .habitCard.shadow-card {
-  background: #fff;
+  background: var(--card-bg);
+  color: var(--card-text);
   border-radius: 18px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.08), 0 1.5px 4px rgba(0,0,0,0.06);
+  box-shadow: 0 8px 32px rgba(33,191,174,0.13), 0 1.5px 4px rgba(0,0,0,0.06);
   border: 2.5px solid #21bfae;
   margin-bottom: 24px;
-  padding: 20px;
+  padding: 20px 20px 20px 20px;
   transition: box-shadow 0.2s, border-color 0.2s;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+.habitCard::before, .habitCard.shadow-card::before {
+  content: '';
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 12px;
+  background: var(--accent-bar);
+  border-top-left-radius: 18px;
+  border-top-right-radius: 18px;
+  box-shadow: 0 2px 8px rgba(33,191,174,0.12);
+}
+.habitCard .status-icon {
+  display: inline-block;
+  margin-right: 8px;
+  font-size: 1.5em;
+  vertical-align: middle;
+  color: #21bfae;
 }
 .habitCard:hover, .habitCard.shadow-card:hover {
   box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 3px 8px rgba(0,0,0,0.10);

@@ -21,7 +21,7 @@ function Login() {
       localStorage.setItem('token', res.data.token);
       localStorage.setItem('username', res.data.username);
       toast.success('Login successful!');
-      navigate('/');
+      navigate('/dashboard'); // Go directly to dashboard after login
     } catch (err) {
       toast.error('Invalid credentials');
     } finally {
@@ -30,9 +30,29 @@ function Login() {
   };
 
   return (
-    <div className={styles.bg}>
-      <div className={`${styles.loginCard} shadow-card`}>
+    <div
+      className={styles.bg}
+      style={{
+        minHeight: '100vh',
+        background: "url('/dashboard.jpg') center center/cover no-repeat",
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}
+    >
+      <div style={{
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        background: 'rgba(30, 42, 62, 0.35)',
+        zIndex: 0
+      }} />
+      <div className={`${styles.loginCard} shadow-card`} style={{ position: 'relative', zIndex: 1 }}>
         <h2 className={styles.title}>Login</h2>
+        <p style={{ textAlign: 'center', fontWeight: 500, fontSize: '1.2rem', color: '#fff', marginBottom: 20 }}>Welcome to Habitura</p>
         <form onSubmit={handleSubmit}>
           <label className={styles.formLabel} htmlFor="email">Email</label>
           <input

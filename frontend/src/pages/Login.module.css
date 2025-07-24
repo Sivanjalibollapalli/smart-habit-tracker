@@ -35,24 +35,27 @@
 
 .bg {
   min-height: 100vh;
-  background: linear-gradient(120deg, #e3edf7, #b6d0e2, #7ea7c7, #3b4a6b);
   display: flex;
   align-items: center;
   justify-content: center;
 }
-
 .loginCard {
-  background: #fff;
+  position: relative;
+  z-index: 1;
+  background: rgba(255,255,255,0.10); /* transparent white */
   border-radius: 20px;
   padding: 2.5rem 2rem;
   max-width: 400px;
   width: 100%;
   margin: 2rem auto;
+  border: 2.5px solid rgba(255,255,255,0.65); /* shiny white border */
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 
 .title {
   text-align: center;
-  color: #3b4a6b;
+  color: #fff;
   font-size: 2rem;
   font-weight: 700;
   margin-bottom: 1.5rem;
@@ -60,7 +63,7 @@
 
 .formLabel {
   display: block;
-  color: #3b4a6b;
+  color: #fff;
   font-weight: 600;
   margin-bottom: 0.3rem;
 }
@@ -70,8 +73,8 @@
   padding: 0.7rem 1rem;
   border: 1.5px solid #b6d0e2;
   border-radius: 10px;
-  background: #f5f6fa;
-  color: #2d3a4a;
+  background: rgba(255,255,255,0.18);
+  color: #fff;
   font-size: 1rem;
   margin-bottom: 1.1rem;
   transition: border-color 0.25s, box-shadow 0.25s;
@@ -82,36 +85,42 @@
   outline: none;
   background: #e3edf7;
 }
+.formInput::placeholder {
+  color: #e3edf7;
+  opacity: 1;
+}
 
 .loginBtn {
   width: 100%;
   padding: 0.8rem 0;
   border-radius: 16px;
   border: none;
-  background: linear-gradient(90deg, #7ea7c7, #3b4a6b 80%);
-  color: #fff;
+  background: linear-gradient(90deg, #fff, #7ea7c7 80%);
+  color: #262320;
   font-weight: 700;
   font-size: 1.1rem;
   margin-top: 1rem;
   cursor: pointer;
+  box-shadow: 0 4px 24px #7ea7c788;
   transition: background 0.22s, box-shadow 0.18s, transform 0.16s;
 }
 .loginBtn:hover, .loginBtn:focus {
-  background: linear-gradient(90deg, #3b4a6b, #7ea7c7 80%);
-  box-shadow: 0 4px 24px #7ea7c788;
+  background: linear-gradient(90deg, #7ea7c7, #fff 80%);
+  color: #262320;
+  box-shadow: 0 8px 32px #7ea7c799;
   transform: scale(1.04);
 }
 
 .signupText {
-  color: #5c6b7a;
+  color: #fff;
   margin-top: 1.7rem;
   font-size: 1rem;
   text-align: center;
 }
 
 .signupText a {
-  color: #3b4a6b;
-  text-decoration: none;
+  color: #fff;
+  text-decoration: underline;
   font-weight: 600;
   margin-left: 4px;
   transition: color 0.2s;

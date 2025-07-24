@@ -14,6 +14,20 @@ import ProgressChart from '../components/ProgressChart';
 import { getWeather } from '../utils/weather';
 import { useRef } from 'react';
 
+function getHabitIcon(habit) {
+  const name = habit.name.toLowerCase();
+  if (name.includes('read') || name.includes('book')) return '📚';
+  if (name.includes('walk')) return '🚶';
+  if (name.includes('run') || name.includes('jog')) return '🏃';
+  if (name.includes('cycle') || name.includes('bike')) return '🚴';
+  if (name.includes('yoga')) return '🧘';
+  if (name.includes('meditate')) return '🧘‍♂️';
+  if (name.includes('drink') || name.includes('water')) return '💧';
+  if (name.includes('dance')) return '💃';
+  // Add more as needed
+  return '⭐'; // Default icon
+}
+
 function Dashboard() {
   const [habits, setHabits] = useState([]);
   const [selectedHabit, setSelectedHabit] = useState(null);
@@ -27,6 +41,8 @@ function Dashboard() {
   const [weather, setWeather] = useState(null);
   const [showSummary, setShowSummary] = useState({}); // { [habitId]: true/false }
   const notifiedHabitsRef = useRef({}); // To avoid duplicate notifications
+  const weatherSuggestedRef = useRef(false);
+  const missedNotifiedRef = useRef({});
 
   const fetchHabitInsights = async (habit) => {
     try {
@@ -57,6 +73,8 @@ function Dashboard() {
       res.data.forEach(fetchHabitInsights);
     } catch (err) {
       console.error('Failed to fetch habits');
+    } finally {
+      // setLoading(false); // Removed loading state
     }
   }, []);
 
@@ -113,30 +131,6 @@ function Dashboard() {
     return () => clearInterval(interval);
   }, [habits, reminderTimes]);
 
-  // Context-aware weather reminder (runs once on load)
-  useEffect(() => {
-    const apiKey = process.env.REACT_APP_WEATHER_API_KEY;
-    if (!('geolocation' in navigator)) return;
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-      try {
-        const weatherMain = await getWeather(pos.coords.latitude, pos.coords.longitude, apiKey);
-        setWeather(weatherMain);
-        // Only show for outdoor habits
-        const outdoorKeywords = ['walk', 'run', 'cycle', 'jog', 'outdoor', 'hike'];
-        habits.forEach(habit => {
-          if (outdoorKeywords.some(word => habit.name.toLowerCase().includes(word) || (habit.description || '').toLowerCase().includes(word))) {
-            if (weatherMain === 'Clear' || weatherMain === 'Clouds') {
-              toast.info(`It's ${weatherMain.toLowerCase()}! Great time for your "${habit.name}" habit.`);
-            }
-          }
-        });
-      } catch (e) {
-        // Ignore weather errors
-      }
-    });
-    // eslint-disable-next-line
-  }, [habits]);
-
   // Add this useEffect at the top level, after other useEffects
   useEffect(() => {
     habits.forEach((habit) => {
@@ -184,30 +178,27 @@ function Dashboard() {
     });
   }, [habits]);
 
-  // Helper to get all days in the last N days
-  const getLastNDates = (n) => {
-    const dates = [];
-    for (let i = 0; i < n; i++) {
-      dates.push(moment().subtract(i, 'days').format('YYYY-MM-DD'));
-    }
-    return dates;
-  };
-
   // Check for missed yesterday and the day before for each habit
   useEffect(() => {
     const yesterday = moment().subtract(1, 'days').format('YYYY-MM-DD');
     const dayBefore = moment().subtract(2, 'days').format('YYYY-MM-DD');
     habits.forEach(habit => {
       if (!habit.targetDays) return;
-      // Only check for missed days if the habit was created before yesterday
       if (moment(habit.createdAt).isAfter(moment().subtract(1, 'days').endOf('day'))) return;
       const completed = new Set(habit.completionDates || []);
       const missedYesterday = !completed.has(yesterday);
       const missedDayBefore = !completed.has(dayBefore);
-      if (missedYesterday && missedDayBefore) {
-        toast.warn(`You missed "${habit.name}" yesterday and the day before.`);
-      } else if (missedYesterday) {
-        toast.warn(`You missed "${habit.name}" yesterday.`);
+      if (!missedNotifiedRef.current[habit._id]) {
+        if (missedYesterday && missedDayBefore) {
+          toast.warn(`You missed "${habit.name}" yesterday and the day before.`);
+          missedNotifiedRef.current[habit._id] = true;
+        } else if (missedYesterday) {
+          toast.warn(`You missed "${habit.name}" yesterday.`);
+          missedNotifiedRef.current[habit._id] = true;
+        } else if (missedDayBefore) {
+          toast.warn(`You missed "${habit.name}" the day before yesterday.`);
+          missedNotifiedRef.current[habit._id] = true;
+        }
       }
     });
   }, [habits]);
@@ -317,40 +308,180 @@ function Dashboard() {
     }
   };
 
+ 
+
+  const suggestLocationHabit = async () => {
+    if (!('geolocation' in navigator)) {
+      toast.info('Geolocation is not supported in your browser.');
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      try {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        // Get city name
+        const res = await axios.get(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`);
+        const city = (res.data.address.city || res.data.address.town || res.data.address.village || res.data.address.state || 'your area');
+        // Get weather
+        const apiKey = process.env.REACT_APP_WEATHER_API_KEY;
+        const weatherRes = await axios.get(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}`);
+        const weatherMain = weatherRes.data.weather[0].main; // e.g., 'Clear', 'Clouds', 'Rain', 'Snow'
+        let suggestion = '';
+        if (weatherMain === 'Clear') {
+          suggestion = `It's sunny in ${city}! Stay hydrated and try a drinking water habit.`;
+        } else if (weatherMain === 'Clouds') {
+          suggestion = `It's cloudy in ${city}! Great time for an outdoor walk or jog.`;
+        } else if (weatherMain === 'Rain') {
+          suggestion = `It's rainy in ${city}! Try an indoor habit like reading or yoga.`;
+        } else if (weatherMain === 'Snow') {
+          suggestion = `It's snowy in ${city}! Stay warm and try a home workout or meditation.`;
+        } else {
+          suggestion = `Explore a new habit in ${city} based on today's weather!`;
+        }
+        toast.info(`📍 Based on your location (${city}): ${suggestion}`);
+      } catch (e) {
+        toast.error('Could not determine your location or weather for suggestions.');
+      }
+    });
+  };
+
+  useEffect(() => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        () => {},
+        (err) => {
+          if (err.code === 1) {
+            toast.info('Location access is needed for weather-based habit suggestions.');
+          }
+        },
+        { timeout: 10000 }
+      );
+    }
+  }, []);
+
   return (
     <>
       <Navbar />
+      <div style={{
+        position: 'relative',
+        width: '100%',
+        height: '370px',
+        overflow: 'hidden',
+        marginBottom: '2rem',
+        borderRadius: '24px',
+        background: '#000'
+      }}>
+        <img
+          src="/dashboard.jpg"
+          alt="Dashboard Hero"
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            filter: 'brightness(0.7)'
+          }}
+        />
+        {/* Brand name left-aligned */}
+        <div style={{
+          position: 'absolute',
+          top: 32,
+          left: 40,
+          color: '#fff',
+          fontSize: '2.5rem',
+          fontWeight: 800,
+          letterSpacing: 2,
+          textShadow: '0 4px 24px #000a',
+          zIndex: 2
+        }}>
+          Habitura
+        </div>
+        {/* Centered dashboard info */}
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          color: '#fff',
+          zIndex: 2,
+          width: '100%'
+        }}>
+          <h2 style={{ fontSize: '2.4rem', fontWeight: 700, marginBottom: 12 }}>HabitFlow</h2>
+          <p style={{ fontSize: '1.25rem', marginBottom: 22, maxWidth: 500, textAlign: 'center' }}>
+            🌟 Build better habits, one day at a time. Track your progress and stay motivated.
+          </p>
+          <div style={{
+            background: 'rgba(0,0,0,0.35)',
+            borderRadius: 16,
+            padding: '18px 36px',
+            marginBottom: 14,
+            fontSize: '2rem',
+            fontWeight: 700,
+            display: 'inline-block'
+          }}>
+            {habitsCompletedToday}/{habits.length}
+          </div>
+          <div style={{ fontWeight: 600, fontSize: '1.25rem', marginTop: 8, marginBottom: 18 }}>
+            {habitsCompletedToday === habits.length && habits.length > 0 ? (
+              <span style={{ color: '#7ea7c7' }}>🎉 All habits complete!</span>
+            ) : (
+              <span style={{ color: '#ffe066' }}>💪 Keep going!</span>
+            )}
+          </div>
+          <div style={{ display: 'flex', gap: 16, marginTop: 8 }}>
+            <button
+              onClick={suggestHabit}
+              style={{
+                background: 'rgba(30, 42, 62, 0.35)',
+                color: '#fff',
+                border: '2px solid #7ea7c7',
+                borderRadius: 18,
+                padding: '0.9rem 2.5rem',
+                fontWeight: 700,
+                fontSize: '1.15rem',
+                boxShadow: '0 4px 24px 0 #0002',
+                backdropFilter: 'blur(6px)',
+                WebkitBackdropFilter: 'blur(6px)',
+                cursor: 'pointer',
+                transition: 'box-shadow 0.22s, transform 0.18s, background 0.22s',
+                letterSpacing: 0.5,
+                marginRight: 4
+              }}
+            >
+              🧠 Suggest a New Habit
+            </button>
+            <button
+              onClick={suggestLocationHabit}
+              style={{
+                background: 'rgba(30, 42, 62, 0.35)',
+                color: '#fff',
+                border: '2px solid #7ea7c7',
+                borderRadius: 18,
+                padding: '0.9rem 2.5rem',
+                fontWeight: 700,
+                fontSize: '1.15rem',
+                boxShadow: '0 4px 24px 0 #0002',
+                backdropFilter: 'blur(6px)',
+                WebkitBackdropFilter: 'blur(6px)',
+                cursor: 'pointer',
+                transition: 'box-shadow 0.22s, transform 0.18s, background 0.22s',
+                letterSpacing: 0.5
+              }}
+            >
+              📍 Suggest a Location-Based Habit
+            </button>
+          </div>
+        </div>
+      </div>
       <div className={styles.dashboardContainer}>
+        <div className="container mt-4 d-flex justify-content-end align-items-center" style={{ gap: 8 }}>
+          {/* Removed dark mode toggle button */}
+          {/* Your Logout button here */}
+        </div>
         <div className="container mt-4">
           <motion.div initial={{ opacity: 0, y: 40 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8 }}>
-            <h2 className={styles.sectionTitle + " text-center mb-2"}>HabitFlow</h2>
-            <motion.p
-              className={styles.dashboardSubtitle}
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1 }}
-            >
-              🌟 Build better habits, one day at a time. Track your progress and stay motivated.
-            </motion.p>
-
-            <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.7, delay: 0.2 }} className={styles.statCircle + " my-4"}>
-              {habitsCompletedToday}/{habits.length}
-            </motion.div>
-            {habitsCompletedToday === habits.length && habits.length > 0 ? (
-              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="mt-3 fw-bold text-success">🎉 All habits complete!</motion.p>
-            ) : (
-              <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5 }} className="mt-3 fw-bold text-warning">💪 Keep going!</motion.p>
-            )}
-
-            <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.3 }} className="text-center my-4">
-              <Button
-                onClick={suggestHabit}
-                className={styles.glowButton}
-              >
-                🧠 Suggest a New Habit
-              </Button>
-            </motion.div>
-
             {showForm && (
               <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.5 }}>
                 <AddHabitForm onHabitAdded={fetchHabits} onCancel={() => setShowForm(false)} />
@@ -382,6 +513,7 @@ function Dashboard() {
                       <div className="d-flex justify-content-between align-items-start">
                         <div>
                           <Card.Title className="text-primary fw-bold mb-1">
+                            <span className="status-icon">{getHabitIcon(habit)}</span>
                             {habit.name}
                             <Form.Control
                               type="time"
